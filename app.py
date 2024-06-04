@@ -55,10 +55,10 @@ async def on_chat_start():
     cl.user_session.set("tweaks", {})
 
 @cl.on_message
-async def on_message(msg: cl.Message):
-    msg = await cl.Message(content="").send()
+async def on_message(input_msg: cl.Message):
+    answer_msg = await cl.Message(content="").send()
     
-    response = await run_flow(message=msg.content, flow_id=cl.user_session.get("flow_id"), tweaks=cl.user_session.get("tweaks"))
+    response = await run_flow(message=input_msg.content, flow_id=cl.user_session.get("flow_id"), tweaks=cl.user_session.get("tweaks"))
     
     stream_url = response.get("outputs")[0].get("outputs")[0].get("artifacts").get("stream_url")
     
@@ -69,6 +69,6 @@ async def on_message(msg: cl.Message):
                 data = line[len("data: "):]
                 parsed = json.loads(data)
                 if token := parsed.get("chunk"):
-                    await msg.stream_token(token)
+                    await answer_msg.stream_token(token)
         
-    await msg.update()
+    await answer_msg.update()
